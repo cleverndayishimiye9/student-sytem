@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — UoK SPM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h4>
+  <span class="text-muted">Welcome, {{ user.get_full_name|default:user.username }}</span>
+</div>
+
+{% if user.role == 'admin' or user.role == 'staff' %}
+<!-- Admin / Staff Dashboard -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-primary"><i class="bi bi-people fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ total_students }}</div>
+      <div class="text-muted small">Total Students</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-success"><i class="bi bi-book fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ total_courses }}</div>
+      <div class="text-muted small">Courses</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-danger"><i class="bi bi-exclamation-triangle fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ at_risk_high|length }}</div>
+      <div class="text-muted small">High Risk Students</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-warning"><i class="bi bi-exclamation-circle fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ at_risk_medium|length }}</div>
+      <div class="text-muted small">Medium Risk Students</div>
+    </div>
+  </div>
+</div>
+
+{% if at_risk_high %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-danger text-white fw-bold">
+    <i class="bi bi-exclamation-triangle me-2"></i>High Risk Students — Immediate Attention Required
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr>
+        <th>Student ID</th><th>Name</th><th>GPA (%)</th><th>Attendance (%)</th><th>Action</th>
+      </tr></thead>
+      <tbody>
+        {% for s in at_risk_high %}
+        <tr>
+          <td>{{ s.student_id }}</td>
+          <td>{{ s.user.get_full_name }}</td>
+          <td><span class="badge bg-danger">{{ s.overall_gpa }}%</span></td>
+          <td><span class="badge bg-danger">{{ s.attendance_rate }}%</span></td>
+          <td><a href="{% url 'student_detail' s.pk %}" class="btn btn-sm btn-outline-danger">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header fw-bold"><i class="bi bi-clock-history me-2"></i>Recent Grade Uploads</div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr>
+        <th>Student</th><th>Course</th><th>Type</th><th>Score</th><th>%</th><th>Grade</th><th>Date</th>
+      </tr></thead>
+      <tbody>
+        {% for g in recent_grades %}
+        <tr>
+          <td>{{ g.student.student_id }}</td>
+          <td>{{ g.course.code }}</td>
+          <td>{{ g.get_grade_type_display }}</td>
+          <td>{{ g.score }}/{{ g.max_score }}</td>
+          <td>{{ g.percentage }}%</td>
+          <td>
+            <span class="badge {% if g.letter_grade == 'A' %}bg-success{% elif g.letter_grade == 'F' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+              {{ g.letter_grade }}
+            </span>
+          </td>
+          <td><small class="text-muted">{{ g.uploaded_at|date:"d M Y" }}</small></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-3">No grades uploaded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% elif user.role == 'lecturer' %}
+<!-- Lecturer Dashboard -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-primary"><i class="bi bi-book fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ my_courses.count }}</div>
+      <div class="text-muted small">My Courses</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-success"><i class="bi bi-people fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ my_students.count }}</div>
+      <div class="text-muted small">My Students</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-danger"><i class="bi bi-exclamation-triangle fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ at_risk|length }}</div>
+      <div class="text-muted small">At-Risk Students</div>
+    </div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">My Courses</div>
+      <ul class="list-group list-group-flush">
+        {% for c in my_courses %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ c.code }} — {{ c.name }}</span>
+          <small class="text-muted">{{ c.semester }}</small>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No courses assigned.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold text-danger">At-Risk Students</div>
+      <ul class="list-group list-group-flush">
+        {% for s in at_risk %}
+        <li class="list-group-item d-flex justify-content-between">
+          <a href="{% url 'student_detail' s.pk %}">{{ s.student_id }} — {{ s.user.get_full_name }}</a>
+          <span class="badge {% if s.risk_level == 'HIGH' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ s.risk_level }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No at-risk students.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% elif user.role == 'student' %}
+<!-- Student Dashboard -->
+{% if profile %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-primary"><i class="bi bi-award fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ gpa }}%</div>
+      <div class="text-muted small">Overall GPA</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-success"><i class="bi bi-calendar-check fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ attendance_rate }}%</div>
+      <div class="text-muted small">Attendance Rate</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon {% if risk_level == 'HIGH' %}text-danger{% elif risk_level == 'MEDIUM' %}text-warning{% else %}text-success{% endif %}">
+        <i class="bi bi-shield-check fs-1"></i>
+      </div>
+      <div class="stat-num fw-bold fs-2">{{ risk_level }}</div>
+      <div class="text-muted small">Risk Level</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card card border-0 shadow-sm text-center p-3">
+      <div class="stat-icon text-info"><i class="bi bi-journal-text fs-1"></i></div>
+      <div class="stat-num fw-bold fs-2">{{ grades.count }}</div>
+      <div class="text-muted small">Total Grades</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">My Grades</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Course</th><th>Type</th><th>%</th><th>Grade</th></tr></thead>
+          <tbody>
+            {% for g in grades %}
+            <tr>
+              <td>{{ g.course.code }}</td>
+              <td>{{ g.get_grade_type_display }}</td>
+              <td>{{ g.percentage }}%</td>
+              <td><span class="badge {% if g.letter_grade == 'A' %}bg-success{% elif g.letter_grade == 'F' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ g.letter_grade }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted py-3">No grades yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Recent Attendance</div>
+      <ul class="list-group list-group-flush">
+        {% for a in attendance %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ a.course.code }} — {{ a.date }}</span>
+          <span class="badge {% if a.status == 'present' %}bg-success{% elif a.status == 'absent' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+            {{ a.get_status_display }}
+          </span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No attendance records.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Record Attendance — UoK SPM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Record Attendance</h4>
+  <p class="text-muted">Mark student attendance. SMS alerts sent if attendance drops below threshold.</p>
+</div>
+<div class="card border-0 shadow-sm" style="max-width:700px;">
+  <div class="card-body p-4">
+    <form method="post">{% csrf_token %}{{ form|crispy }}</form>
+  </div>
+</div>
+{% endblock %}

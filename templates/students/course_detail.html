@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ course.code }} — UoK SPM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Back to Courses
+  </a>
+  <h4 class="fw-bold mb-1">{{ course.code }} — {{ course.name }}</h4>
+  <p class="text-muted mb-0">
+    {{ course.department.name }} &bull; {{ course.semester }} &bull;
+    {{ course.academic_year }} &bull; {{ course.credit_hours }} credit hours
+  </p>
+  <p class="mb-0"><strong>Lecturer:</strong> {{ course.lecturer.get_full_name|default:"Not assigned" }}</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Enrolled Students ({{ enrollments.count }})</div>
+      <ul class="list-group list-group-flush" style="max-height:400px;overflow-y:auto;">
+        {% for e in enrollments %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+          <div>
+            <div class="small fw-semibold">{{ e.student.user.get_full_name }}</div>
+            <div class="text-muted" style="font-size:.75rem">{{ e.student.student_id }}</div>
+          </div>
+          <a href="{% url 'student_detail' e.student.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No students enrolled.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header fw-bold">Recent Grades</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Student</th><th>Type</th><th>Score</th><th>%</th><th>Grade</th></tr></thead>
+          <tbody>
+            {% for g in grades %}
+            <tr>
+              <td>{{ g.student.student_id }}</td>
+              <td>{{ g.get_grade_type_display }}</td>
+              <td>{{ g.score }}/{{ g.max_score }}</td>
+              <td>{{ g.percentage }}%</td>
+              <td><span class="badge {% if g.letter_grade == 'A' %}bg-success{% elif g.letter_grade == 'F' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ g.letter_grade }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">No grades yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Recent Attendance</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Student</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for a in attendance %}
+            <tr>
+              <td>{{ a.student.student_id }}</td>
+              <td>{{ a.date }}</td>
+              <td>
+                <span class="badge {% if a.status == 'present' %}bg-success{% elif a.status == 'absent' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                  {{ a.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted py-3">No attendance records.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

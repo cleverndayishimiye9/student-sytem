@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Bulk Attendance — UoK SPM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-people me-2 text-primary"></i>Bulk Attendance Entry</h4>
+  <p class="text-muted">Mark attendance for all students in a course at once.</p>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label fw-semibold">Course</label>
+          <select name="course_id" class="form-select" required id="courseSelect">
+            <option value="">-- Select Course --</option>
+            {% for course in courses %}
+            <option value="{{ course.pk }}" {% if selected_course and selected_course.pk == course.pk %}selected{% endif %}>
+              {{ course.code }} — {{ course.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Date</label>
+          <input type="date" name="date" class="form-control" value="{{ today }}" required>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button type="submit" name="action" value="load" class="btn btn-outline-primary w-100">
+            <i class="bi bi-arrow-clockwise me-2"></i>Load Students
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if students %}
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-bold">{{ selected_course.code }} — {{ students|length }} Students</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('present')">Mark All Present</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('absent')">Mark All Absent</button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Student ID</th>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td class="text-muted">{{ forloop.counter }}</td>
+            <td>{{ student.student_id }}</td>
+            <td>{{ student.user.get_full_name }}</td>
+            <td style="width:200px">
+              <select name="status_{{ student.pk }}" class="form-select form-select-sm status-select">
+                <option value="present" {% if student.today_status == 'present' %}selected{% endif %}>Present</option>
+                <option value="absent" {% if student.today_status == 'absent' %}selected{% endif %}>Absent</option>
+                <option value="late" {% if student.today_status == 'late' %}selected{% endif %}>Late</option>
+                <option value="excused" {% if student.today_status == 'excused' %}selected{% endif %}>Excused</option>
+              </select>
+            </td>
+            <td>
+              <input type="text" name="notes_{{ student.pk }}" class="form-control form-control-sm" placeholder="Optional note">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer text-end">
+      <button type="submit" name="action" value="save" class="btn btn-success px-4">
+        <i class="bi bi-save me-2"></i>Save All Attendance
+      </button>
+    </div>
+  </div>
+  {% endif %}
+</form>
+
+<script>
+function markAll(status) {
+  document.querySelectorAll('.status-select').forEach(function(sel) {
+    sel.value = status;
+  });
+}
+</script>
+{% endblock %}

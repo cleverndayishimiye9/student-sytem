@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ student.user.get_full_name }} — UoK SPM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'student_list' %}" class="btn btn-sm btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Back to Students
+  </a>
+  <div class="d-flex justify-content-between align-items-start">
+    <div>
+      <h4 class="fw-bold mb-1">{{ student.user.get_full_name }}</h4>
+      <p class="text-muted mb-0">{{ student.student_id }} &bull; Year {{ student.year_of_study }} &bull; {{ student.department.name|default:"No Department" }}</p>
+    </div>
+    <span class="badge fs-6 {% if student.risk_level == 'HIGH' %}bg-danger{% elif student.risk_level == 'MEDIUM' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+      {{ student.risk_level }} RISK
+    </span>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="text-primary fs-1"><i class="bi bi-award"></i></div>
+      <div class="fw-bold fs-3">{{ student.overall_gpa }}%</div>
+      <div class="text-muted small">Overall GPA</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="text-success fs-1"><i class="bi bi-calendar-check"></i></div>
+      <div class="fw-bold fs-3">{{ student.attendance_rate }}%</div>
+      <div class="text-muted small">Attendance Rate</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="text-info fs-1"><i class="bi bi-telephone"></i></div>
+      <div class="fw-bold">{{ student.user.phone_number|default:"Not set" }}</div>
+      <div class="text-muted small">Phone (for SMS)</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header fw-bold">Grades</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Course</th><th>Type</th><th>Score</th><th>%</th><th>Grade</th></tr></thead>
+          <tbody>
+            {% for g in grades %}
+            <tr>
+              <td>{{ g.course.code }}</td>
+              <td>{{ g.get_grade_type_display }}</td>
+              <td>{{ g.score }}/{{ g.max_score }}</td>
+              <td>{{ g.percentage }}%</td>
+              <td><span class="badge {% if g.letter_grade == 'A' %}bg-success{% elif g.letter_grade == 'F' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ g.letter_grade }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">No grades.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header fw-bold">Attendance Records</div>
+      <ul class="list-group list-group-flush" style="max-height:300px;overflow-y:auto;">
+        {% for a in attendance %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+          <span class="small">{{ a.course.code }} — {{ a.date }}</span>
+          <span class="badge {% if a.status == 'present' %}bg-success{% elif a.status == 'absent' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+            {{ a.get_status_display }}
+          </span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No attendance records.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Enrolled Courses</div>
+      <ul class="list-group list-group-flush">
+        {% for e in enrollments %}
+        <li class="list-group-item small">{{ e.course.code }} — {{ e.course.name }}</li>
+        {% empty %}
+        <li class="list-group-item text-muted">Not enrolled in any courses.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

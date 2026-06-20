@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center login-bg">
+  <div class="card shadow-lg login-card" style="width: 420px;">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <div class="login-logo mb-3">
+          <i class="bi bi-mortarboard-fill text-primary" style="font-size: 3rem;"></i>
+        </div>
+        <h4 class="fw-bold">University of Kigali</h4>
+        <p class="text-muted small">Student Performance Monitoring System</p>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        {% if form.errors %}
+          <div class="alert alert-danger mt-2">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Invalid username or password. Please try again.
+          </div>
+        {% endif %}
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+          </button>
+        </div>
+        <div class="text-center mt-3">
+          <a href="/accounts/password-reset/" class="text-muted small">
+            <i class="bi bi-key me-1"></i>Forgot Password?
+          </a>
+        </div>
+      </form>
+    </div>
+    <div class="card-footer text-center text-muted small py-3">
+      &copy; 2026 University of Kigali &mdash; NDAYISHIMIZE CLAVER (2301000358)
+    </div>
+  </div>
+</div>
+{% endblock %}

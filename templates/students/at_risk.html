@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}At-Risk Students — UoK SPM{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>At-Risk Students</h4>
+
+{% if high_risk %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-danger text-white fw-bold">
+    🔴 High Risk — {{ high_risk|length }} students
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>ID</th><th>Name</th><th>GPA</th><th>Attendance</th><th>Phone</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for s in high_risk %}
+        <tr>
+          <td>{{ s.student_id }}</td>
+          <td>{{ s.user.get_full_name }}</td>
+          <td><span class="badge bg-danger">{{ s.overall_gpa }}%</span></td>
+          <td><span class="badge bg-danger">{{ s.attendance_rate }}%</span></td>
+          <td>{{ s.user.phone_number|default:"—" }}</td>
+          <td><a href="{% url 'student_detail' s.pk %}" class="btn btn-sm btn-outline-danger">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if medium_risk %}
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-warning text-dark fw-bold">
+    🟡 Medium Risk — {{ medium_risk|length }} students
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>ID</th><th>Name</th><th>GPA</th><th>Attendance</th><th>Phone</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for s in medium_risk %}
+        <tr>
+          <td>{{ s.student_id }}</td>
+          <td>{{ s.user.get_full_name }}</td>
+          <td><span class="badge bg-warning text-dark">{{ s.overall_gpa }}%</span></td>
+          <td><span class="badge bg-warning text-dark">{{ s.attendance_rate }}%</span></td>
+          <td>{{ s.user.phone_number|default:"—" }}</td>
+          <td><a href="{% url 'student_detail' s.pk %}" class="btn btn-sm btn-outline-warning">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if not high_risk and not medium_risk %}
+<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>No at-risk students found.</div>
+{% endif %}
+{% endblock %}

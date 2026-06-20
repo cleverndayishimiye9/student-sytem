@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Alert Settings — UoK SPM{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-sliders me-2 text-primary"></i>Alert Threshold Settings</h4>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Add New Threshold Config</div>
+      <div class="card-body">
+        <form method="post">{% csrf_token %}{{ form|crispy }}</form>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-header fw-bold text-danger">Manual Bulk Alert Scan</div>
+      <div class="card-body">
+        <p class="text-muted small">Trigger an immediate scan of all students and send SMS alerts to those below thresholds.</p>
+        <form method="post" action="{% url 'trigger_bulk_alert' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-send me-2"></i>Run Bulk Alert Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Existing Configurations</div>
+      <ul class="list-group list-group-flush">
+        {% for t in thresholds %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <strong>{{ t.name }}</strong>
+            <span class="badge {% if t.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+              {% if t.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+          </div>
+          <small class="text-muted">
+            Grade &lt; {{ t.grade_threshold }}% &bull; Attendance &lt; {{ t.attendance_threshold }}%
+          </small>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No configurations. Using system defaults (Grade &lt; 50%, Attendance &lt; 75%).</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
