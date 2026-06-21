@@ -32,6 +32,32 @@ class GradeUploadForm(forms.ModelForm):
         )
 
 
+class GradeEditForm(forms.ModelForm):
+    class Meta:
+        model = Grade
+        fields = ('student', 'course', 'grade_type', 'score', 'max_score', 'comments')
+        widgets = {
+            'comments': forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Row(
+                Column('student', css_class='col-md-6'),
+                Column('course', css_class='col-md-6'),
+            ),
+            Row(
+                Column('grade_type', css_class='col-md-4'),
+                Column('score', css_class='col-md-4'),
+                Column('max_score', css_class='col-md-4'),
+            ),
+            'comments',
+            Submit('submit', 'Update Grade', css_class='btn btn-primary'),
+        )
+
+
 class AttendanceForm(forms.ModelForm):
     class Meta:
         model = AttendanceRecord

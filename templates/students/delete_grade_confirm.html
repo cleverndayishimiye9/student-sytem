@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Delete Grade — UoK SPM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h4 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h4>
+</div>
+<div class="card border-0 shadow-sm" style="max-width:600px;">
+  <div class="card-body p-4">
+    <p>Are you sure you want to delete this grade record?</p>
+    <ul class="list-unstyled mb-4">
+      <li><strong>Student:</strong> {{ grade.student.student_id }} — {{ grade.student.user.get_full_name }}</li>
+      <li><strong>Course:</strong> {{ grade.course.code }}</li>
+      <li><strong>Type:</strong> {{ grade.get_grade_type_display }}</li>
+      <li><strong>Score:</strong> {{ grade.score }}/{{ grade.max_score }}</li>
+    </ul>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash me-2"></i>Yes, Delete
+      </button>
+      <a href="{% url 'grade_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

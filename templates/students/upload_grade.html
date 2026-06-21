@@ -8,7 +8,15 @@
 </div>
 <div class="card border-0 shadow-sm" style="max-width:700px;">
   <div class="card-body p-4">
-    <form method="post">{% csrf_token %}{{ form|crispy }}</form>
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="bi bi-cloud-upload me-2"></i>Upload Grade
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

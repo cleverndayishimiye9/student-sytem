@@ -5,7 +5,7 @@ from django.db.models import Avg, Count
 from django.conf import settings
 
 from .models import StudentProfile, Course, Grade, AttendanceRecord, Enrollment, AcademicYear
-from .forms import GradeUploadForm, AttendanceForm, StudentProfileForm, EnrollmentForm
+from .forms import GradeUploadForm, GradeEditForm, AttendanceForm, StudentProfileForm, EnrollmentForm
 from apps.notifications.services import check_and_send_alerts
 
 
@@ -165,3 +165,48 @@ def at_risk_students(request):
         'high_risk': high_risk,
         'medium_risk': medium_risk,
     })
+
+
+@login_required
+def grade_list(request):
+    if not request.user.is_admin:
+        messages.error(request, 'Only admins can manage all grades.')
+        return redirect('dashboard')
+
+    grades = Grade.objects.select_related('student', 'course').order_by('-uploaded_at')
+    return render(request, 'students/grade_list.html', {'grades': grades})
+
+
+@login_required
+def edit_grade(request, grade_id):
+    if not request.user.is_admin:
+        messages.error(request, 'Only admins can edit grades.')
+        return redirect('dashboard')
+
+    grade = get_object_or_404(Grade, pk=grade_id)
+    form = GradeEditForm(instance=grade)
+
+    if request.method == 'POST':
+        form = GradeEditForm(request.POST, instance=grade)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Grade updated for {grade.student}.')
+            check_and_send_alerts(grade.student)
+            return redirect('grade_list')
+
+    return render(request, 'students/edit_grade.html', {'form': form, 'grade': grade})
+
+
+@login_required
+def delete_grade(request, grade_id):
+    if not request.user.is_admin:
+        messages.error(request, 'Only admins can delete grades.')
+        return redirect('dashboard')
+
+    grade = get_object_or_404(Grade, pk=grade_id)
+    if request.method == 'POST':
+        grade.delete()
+        messages.success(request, 'Grade deleted successfully.')
+        return redirect('grade_list')
+
+    return render(request, 'students/delete_grade_confirm.html', {'grade': grade})

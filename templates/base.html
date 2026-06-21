@@ -12,7 +12,6 @@
 <body>
 
 {% if user.is_authenticated %}
-<!-- Sidebar Navigation -->
 <div class="d-flex">
   <nav id="sidebar" class="sidebar d-flex flex-column p-3">
     <div class="sidebar-brand mb-4">
@@ -31,12 +30,12 @@
 
       {% if user.role == 'admin' or user.role == 'lecturer' or user.role == 'staff' %}
       <li class="nav-item">
-        <a href="{% url 'student_list' %}" class="nav-link {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'student_list' %}" class="nav-link">
           <i class="bi bi-people me-2"></i> Students
         </a>
       </li>
       <li class="nav-item">
-        <a href="{% url 'course_list' %}" class="nav-link {% if 'course' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'course_list' %}" class="nav-link">
           <i class="bi bi-book me-2"></i> Courses
         </a>
       </li>
@@ -66,6 +65,11 @@
       {% endif %}
 
       {% if user.role == 'admin' %}
+      <li class="nav-item">
+        <a href="{% url 'grade_list' %}" class="nav-link">
+          <i class="bi bi-journal-text me-2"></i> Manage Grades
+        </a>
+      </li>
       <li class="nav-item">
         <a href="{% url 'enroll_student' %}" class="nav-link">
           <i class="bi bi-person-plus me-2"></i> Enrollment
@@ -116,7 +120,6 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <main class="main-content flex-grow-1">
     <div class="topbar d-flex align-items-center justify-content-between px-4 py-3">
       <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
@@ -142,7 +145,6 @@
     </div>
   </main>
 </div>
-
 {% else %}
   {% block auth_content %}{% endblock %}
 {% endif %}
