@@ -72,7 +72,6 @@ def student_list(request):
 def student_detail(request, student_id):
     student = get_object_or_404(StudentProfile, pk=student_id)
 
-    # Students can only see their own profile
     if request.user.is_student_role and request.user.student_profile != student:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
@@ -105,8 +104,14 @@ def upload_grade(request):
             grade.uploaded_by = request.user
             grade.save()
             messages.success(request, f'Grade uploaded for {grade.student}.')
-            # Trigger alert check
-            check_and_send_alerts(grade.student)
+            # Trigger early warning alert with component details
+            check_and_send_alerts(
+                grade.student,
+                course=grade.course,
+                grade_type=grade.grade_type,
+                score=grade.score,
+                max_score=grade.max_score
+            )
             return redirect('upload_grade')
 
     return render(request, 'students/upload_grade.html', {'form': form})
@@ -191,7 +196,14 @@ def edit_grade(request, grade_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'Grade updated for {grade.student}.')
-            check_and_send_alerts(grade.student)
+            # Trigger early warning alert with component details
+            check_and_send_alerts(
+                grade.student,
+                course=grade.course,
+                grade_type=grade.grade_type,
+                score=grade.score,
+                max_score=grade.max_score
+            )
             return redirect('grade_list')
 
     return render(request, 'students/edit_grade.html', {'form': form, 'grade': grade})
