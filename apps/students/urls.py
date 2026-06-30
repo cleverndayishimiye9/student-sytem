@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views_bulk import bulk_attendance
+from .views_bulk_grades import bulk_grade_entry
 from .views_courses import course_list, course_detail
 
 urlpatterns = [
@@ -8,6 +9,7 @@ urlpatterns = [
     path('students/', views.student_list, name='student_list'),
     path('students/<int:student_id>/', views.student_detail, name='student_detail'),
     path('grades/upload/', views.upload_grade, name='upload_grade'),
+    path('grades/bulk/', bulk_grade_entry, name='bulk_grade_entry'),
     path('grades/', views.grade_list, name='grade_list'),
     path('grades/<int:grade_id>/edit/', views.edit_grade, name='edit_grade'),
     path('grades/<int:grade_id>/delete/', views.delete_grade, name='delete_grade'),

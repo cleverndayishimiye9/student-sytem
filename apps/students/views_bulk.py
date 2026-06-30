@@ -1,6 +1,3 @@
-"""
-Bulk attendance view — add to apps/students/views.py or import from here.
-"""
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -22,6 +19,8 @@ def bulk_attendance(request):
     selected_course = None
     students = []
     today = timezone.now().date().isoformat()
+    saved_done = False
+    saved_count = 0
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -41,17 +40,20 @@ def bulk_attendance(request):
             load_date = date_cls.fromisoformat(date_str)
             for e in enrollments:
                 s = e.student
-                # Check if already recorded
                 existing = AttendanceRecord.objects.filter(
                     student=s, course=selected_course, date=load_date
                 ).first()
-                s.today_status = existing.status if existing else 'present'
+                if existing:
+                    s.today_status = existing.status
+                else:
+                    s.today_status = 'present'
                 students.append(s)
             return render(request, 'students/bulk_attendance.html', {
                 'courses': courses,
                 'selected_course': selected_course,
                 'students': students,
                 'today': date_str,
+                'saved_done': False,
             })
 
         elif action == 'save' and selected_course:
@@ -61,18 +63,26 @@ def bulk_attendance(request):
             saved = 0
             for e in enrollments:
                 s = e.student
-                status = request.POST.get(f'status_{s.pk}', 'present')
-                notes = request.POST.get(f'notes_{s.pk}', '')
+                status = request.POST.get('status_' + str(s.pk), 'present')
+                notes = request.POST.get('notes_' + str(s.pk), '')
                 obj, created = AttendanceRecord.objects.update_or_create(
                     student=s, course=selected_course, date=save_date,
                     defaults={'status': status, 'notes': notes, 'recorded_by': request.user}
                 )
                 check_and_send_alerts(s)
-                saved += 1
-            messages.success(request, f'Attendance saved for {saved} students.')
-            return redirect('bulk_attendance')
+                saved = saved + 1
+            saved_done = True
+            saved_count = saved
+            return render(request, 'students/bulk_attendance.html', {
+                'courses': courses,
+                'today': today,
+                'saved_done': True,
+                'saved_count': saved_count,
+                'selected_course': selected_course,
+            })
 
     return render(request, 'students/bulk_attendance.html', {
         'courses': courses,
         'today': today,
+        'saved_done': False,
     })

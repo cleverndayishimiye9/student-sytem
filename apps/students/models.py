@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class AcademicYear(models.Model):
-    year = models.CharField(max_length=20, unique=True)  # e.g., "2025/2026"
+    year = models.CharField(max_length=20, unique=True)
     is_current = models.BooleanField(default=False)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -42,14 +42,14 @@ class Course(models.Model):
     semester = models.CharField(max_length=20, choices=[('Semester 1', 'Semester 1'), ('Semester 2', 'Semester 2')])
 
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        return self.code + " - " + self.name
 
     class Meta:
         ordering = ['code']
 
 
 class StudentProfile(models.Model):
-    YEAR_CHOICES = [(i, f'Year {i}') for i in range(1, 5)]
+    YEAR_CHOICES = [(i, 'Year ' + str(i)) for i in range(1, 5)]
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_profile'
@@ -63,7 +63,7 @@ class StudentProfile(models.Model):
     guardian_phone = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
-        return f"{self.student_id} - {self.user.get_full_name()}"
+        return self.student_id + " - " + self.user.get_full_name()
 
     @property
     def overall_gpa(self):
@@ -104,17 +104,16 @@ class Enrollment(models.Model):
         unique_together = ('student', 'course')
 
     def __str__(self):
-        return f"{self.student.student_id} → {self.course.code}"
+        return self.student.student_id + " -> " + self.course.code
 
 
 class Grade(models.Model):
     GRADE_TYPES = [
+        ('ASSIGNMENT1', 'Assignment 1'),
+        ('ASSIGNMENT2', 'Assignment 2'),
         ('CAT1', 'Continuous Assessment Test 1'),
         ('CAT2', 'Continuous Assessment Test 2'),
-        ('ASSIGNMENT', 'Assignment'),
-        ('MIDTERM', 'Mid-Term Exam'),
         ('FINAL', 'Final Exam'),
-        ('PROJECT', 'Project'),
     ]
 
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='grades')
@@ -137,14 +136,18 @@ class Grade(models.Model):
     @property
     def letter_grade(self):
         p = self.percentage
-        if p >= 80: return 'A'
-        elif p >= 70: return 'B'
-        elif p >= 60: return 'C'
-        elif p >= 50: return 'D'
+        if p >= 80:
+            return 'A'
+        elif p >= 70:
+            return 'B'
+        elif p >= 60:
+            return 'C'
+        elif p >= 50:
+            return 'D'
         return 'F'
 
     def __str__(self):
-        return f"{self.student.student_id} | {self.course.code} | {self.grade_type}: {self.score}/{self.max_score}"
+        return self.student.student_id + " | " + self.course.code + " | " + self.grade_type + ": " + str(self.score) + "/" + str(self.max_score)
 
     class Meta:
         unique_together = ('student', 'course', 'grade_type')
@@ -169,7 +172,7 @@ class AttendanceRecord(models.Model):
     notes = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.student.student_id} | {self.course.code} | {self.date} | {self.status}"
+        return self.student.student_id + " | " + self.course.code + " | " + str(self.date) + " | " + self.status
 
     class Meta:
         unique_together = ('student', 'course', 'date')

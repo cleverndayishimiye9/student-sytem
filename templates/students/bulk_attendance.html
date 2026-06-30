@@ -1,10 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Bulk Attendance — UoK SPM{% endblock %}
+{% block title %}Bulk Attendance - UoK SPM{% endblock %}
 {% block content %}
 <div class="mb-4">
   <h4 class="fw-bold mb-0"><i class="bi bi-people me-2 text-primary"></i>Bulk Attendance Entry</h4>
   <p class="text-muted">Mark attendance for all students in a course at once.</p>
 </div>
+
+{% if saved_done %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  Attendance saved for {{ saved_count }} students successfully!
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3">What do you want to do next?</h5>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'bulk_attendance' %}" class="btn btn-primary">
+        <i class="bi bi-people me-1"></i> Record Another Attendance
+      </a>
+      <a href="{% url 'bulk_grade_entry' %}" class="btn btn-success">
+        <i class="bi bi-table me-1"></i> Entry Marks
+      </a>
+      <a href="{% url 'student_list' %}" class="btn btn-warning">
+        <i class="bi bi-people me-1"></i> View Students
+      </a>
+      <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+        <i class="bi bi-house me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <form method="post">
   {% csrf_token %}
@@ -17,7 +43,7 @@
             <option value="">-- Select Course --</option>
             {% for course in courses %}
             <option value="{{ course.pk }}" {% if selected_course and selected_course.pk == course.pk %}selected{% endif %}>
-              {{ course.code }} — {{ course.name }}
+              {{ course.code }} - {{ course.name }}
             </option>
             {% endfor %}
           </select>
@@ -38,7 +64,7 @@
   {% if students %}
   <div class="card border-0 shadow-sm mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <span class="fw-bold">{{ selected_course.code }} — {{ students|length }} Students</span>
+      <span class="fw-bold">{{ selected_course.code }} - {{ students|length }} Students</span>
       <div class="d-flex gap-2">
         <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('present')">Mark All Present</button>
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('absent')">Mark All Absent</button>
@@ -78,6 +104,7 @@
       </table>
     </div>
     <div class="card-footer text-end">
+      <input type="hidden" name="course_id" value="{{ selected_course.pk }}">
       <button type="submit" name="action" value="save" class="btn btn-success px-4">
         <i class="bi bi-save me-2"></i>Save All Attendance
       </button>

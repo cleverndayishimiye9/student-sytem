@@ -104,7 +104,6 @@ def upload_grade(request):
             grade.uploaded_by = request.user
             grade.save()
             messages.success(request, f'Grade uploaded for {grade.student}.')
-            # Trigger early warning alert with component details
             check_and_send_alerts(
                 grade.student,
                 course=grade.course,
@@ -146,14 +145,19 @@ def enroll_student(request):
         return redirect('dashboard')
 
     form = EnrollmentForm()
+    enrolled = False
+
     if request.method == 'POST':
         form = EnrollmentForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Student enrolled successfully.')
-            return redirect('enroll_student')
+            enrolled = True
+            form = EnrollmentForm()
 
-    return render(request, 'students/enroll_student.html', {'form': form})
+    return render(request, 'students/enroll_student.html', {
+        'form': form,
+        'enrolled': enrolled,
+    })
 
 
 @login_required
@@ -196,7 +200,6 @@ def edit_grade(request, grade_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'Grade updated for {grade.student}.')
-            # Trigger early warning alert with component details
             check_and_send_alerts(
                 grade.student,
                 course=grade.course,

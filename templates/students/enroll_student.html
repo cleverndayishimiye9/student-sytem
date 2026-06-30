@@ -3,9 +3,42 @@
 {% block title %}Enroll Student — UoK SPM{% endblock %}
 {% block content %}
 <h4 class="fw-bold mb-4"><i class="bi bi-person-plus me-2 text-primary"></i>Enroll Student in Course</h4>
+
+{% if enrolled %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  Student enrolled successfully!
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<div class="card border-0 shadow-sm mb-4" style="max-width:600px;">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3">What do you want to do next?</h5>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'enroll_student' %}" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i> Enroll Another Student
+      </a>
+      <a href="{% url 'upload_grade' %}" class="btn btn-success">
+        <i class="bi bi-pencil-square me-1"></i> Upload Grades
+      </a>
+      <a href="{% url 'record_attendance' %}" class="btn btn-warning">
+        <i class="bi bi-calendar-check me-1"></i> Record Attendance
+      </a>
+      <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+        <i class="bi bi-house me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="card border-0 shadow-sm" style="max-width:600px;">
   <div class="card-body p-4">
-    <form method="post">{% csrf_token %}{{ form|crispy }}</form>
+    <form method="post" action="{% url 'enroll_student' %}">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary mt-3">
+        <i class="bi bi-check-circle me-1"></i> Enroll Student
+      </button>
+    </form>
   </div>
 </div>
 {% endblock %}

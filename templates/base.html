@@ -53,6 +53,11 @@
         </a>
       </li>
       <li class="nav-item">
+        <a href="{% url 'bulk_grade_entry' %}" class="nav-link">
+          <i class="bi bi-table me-2"></i> Entry Marks
+        </a>
+      </li>
+      <li class="nav-item">
         <a href="{% url 'record_attendance' %}" class="nav-link">
           <i class="bi bi-calendar-check me-2"></i> Attendance
         </a>
@@ -78,6 +83,16 @@
       <li class="nav-item">
         <a href="{% url 'manage_users' %}" class="nav-link">
           <i class="bi bi-person-gear me-2"></i> Manage Users
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'register_student' %}" class="nav-link">
+          <i class="bi bi-person-plus-fill me-2"></i> Register Student
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'student_list_with_parents' %}" class="nav-link">
+          <i class="bi bi-people-fill me-2"></i> Students & Parents
         </a>
       </li>
       {% endif %}
