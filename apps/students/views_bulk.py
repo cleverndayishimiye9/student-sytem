@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.utils import timezone
 
 from .models import Course, StudentProfile, Enrollment, AttendanceRecord
-from apps.notifications.services import check_and_send_alerts
 
 
 @login_required
@@ -69,7 +68,6 @@ def bulk_attendance(request):
                     student=s, course=selected_course, date=save_date,
                     defaults={'status': status, 'notes': notes, 'recorded_by': request.user}
                 )
-                check_and_send_alerts(s)
                 saved = saved + 1
             saved_done = True
             saved_count = saved

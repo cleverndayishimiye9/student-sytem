@@ -11,7 +11,6 @@ from apps.notifications.services import check_and_send_alerts
 
 @login_required
 def dashboard(request):
-    """Main dashboard — adapts content based on user role."""
     user = request.user
     context = {'user': user}
 
@@ -103,7 +102,7 @@ def upload_grade(request):
             grade = form.save(commit=False)
             grade.uploaded_by = request.user
             grade.save()
-            messages.success(request, f'Grade uploaded for {grade.student}.')
+            messages.success(request, 'Grade uploaded for ' + str(grade.student) + '.')
             check_and_send_alerts(
                 grade.student,
                 course=grade.course,
@@ -132,7 +131,6 @@ def record_attendance(request):
             record.recorded_by = request.user
             record.save()
             messages.success(request, 'Attendance recorded.')
-            check_and_send_alerts(record.student)
             return redirect('record_attendance')
 
     return render(request, 'students/record_attendance.html', {'form': form})
@@ -199,7 +197,7 @@ def edit_grade(request, grade_id):
         form = GradeEditForm(request.POST, instance=grade)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Grade updated for {grade.student}.')
+            messages.success(request, 'Grade updated for ' + str(grade.student) + '.')
             check_and_send_alerts(
                 grade.student,
                 course=grade.course,
